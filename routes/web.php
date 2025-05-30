@@ -19,4 +19,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// ROUTE FOR PHOTOBOOTH
+Route::get('/photobooth', function () {
+    return view('photobooth');
+});
+
+
 require __DIR__.'/auth.php';
