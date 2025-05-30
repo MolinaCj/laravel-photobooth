@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Landing from './components/Landing';
+import Landing from './Pages/Landing';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -28,8 +28,8 @@ createInertiaApp({
     },
 });
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <Landing />
-    </React.StrictMode>
-);
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//     <React.StrictMode>
+//         <Landing />
+//     </React.StrictMode>
+// );
