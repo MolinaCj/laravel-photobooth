@@ -14,6 +14,22 @@ const Customize = () => {
     const [isStripNone, setIsStripNone] = useState(true); // "None" checkbox initially checked
     const [selectedSticker, setSelectedSticker] = useState(null);
     const [showMobilePreview, setShowMobilePreview] = useState(false);
+    const [stickers, setStickers] = useState([
+        "🎉",
+        "🌟",
+        "😎",
+        "💖",
+        "🔥",
+        "🍀",
+        "✨",
+        "💥",
+        "🐱‍👤",
+        "🌈",
+        "🎈",
+        "🍓",
+        "🎵",
+    ]);
+    const [newSticker, setNewSticker] = useState("");
 
     useEffect(() => {
         const storedImages =
@@ -36,7 +52,7 @@ const Customize = () => {
         cold: "brightness-95 hue-rotate-[220deg] saturate-75",
     };
 
-    const stickers = ["🎉", "🌟", "😎", "💖"];
+    // const stickers = ["🎉", "🌟", "😎", "💖"];
 
     // Render a single photo with optional sticker overlay and filter
     const applySticker = (img, index) => (
@@ -63,172 +79,202 @@ const Customize = () => {
     );
 
     // For download
-    const handleDownload = () => {
-  const original = document.querySelector(".p-4.w-fit.relative");
-  if (!original) return;
+const handleDownload = () => {
+    const original = document.querySelector(".p-4.w-fit.relative");
+    if (!original) return;
 
-  const cloneWrapper = original.closest(".preview-scale-wrapper");
-  if (!cloneWrapper) return;
+    const cloneWrapper = original.closest(".preview-scale-wrapper");
+    if (!cloneWrapper) return;
 
-  const clone = cloneWrapper.cloneNode(true);
-  clone.classList.remove("scale-[0.6]", "scale-[0.75]", "scale-[0.9]", "scale-100");
-
-  const hiddenContainer = document.createElement("div");
-  hiddenContainer.style.position = "fixed";
-  hiddenContainer.style.top = "-10000px";
-  hiddenContainer.style.left = "-10000px";
-  hiddenContainer.style.zIndex = "-1";
-  hiddenContainer.appendChild(clone);
-  document.body.appendChild(hiddenContainer);
-
-  const waitForImages = (container) => {
-    const imgs = container.querySelectorAll("img");
-    return Promise.all(
-      Array.from(imgs).map((img) => {
-        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = img.onerror = () => resolve();
-        });
-      })
+    const clone = cloneWrapper.cloneNode(true);
+    clone.classList.remove(
+        "scale-[0.6]",
+        "scale-[0.75]",
+        "scale-[0.9]",
+        "scale-100"
     );
-  };
 
-  // Open the tab *before* async operations to avoid popup blocking
-  let newTab = null;
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-  if (isMobile) {
-    newTab = window.open("about:blank", "_blank");
-    if (!newTab) {
-      alert("Popup blocked. Please enable popups to download the image.");
-      return;
+    const hiddenContainer = document.createElement("div");
+    hiddenContainer.style.position = "fixed";
+    hiddenContainer.style.top = "-10000px";
+    hiddenContainer.style.left = "-10000px";
+    hiddenContainer.style.zIndex = "-1";
+    hiddenContainer.appendChild(clone);
+    document.body.appendChild(hiddenContainer);
+
+    // === APPLY CRITICAL INLINE STYLES ===
+    const dateInClone = clone.querySelector(".text-xs.font-cursive");
+if (dateInClone) {
+    const computed = getComputedStyle(dateInClone);
+    dateInClone.style.fontFamily = computed.fontFamily;
+    dateInClone.style.fontSize = computed.fontSize;
+    dateInClone.style.color = computed.color;
+    dateInClone.style.backgroundColor = computed.backgroundColor;
+    dateInClone.style.padding = computed.padding;
+    dateInClone.style.boxShadow = computed.boxShadow;
+    dateInClone.style.textAlign = "center";
+    dateInClone.style.marginTop = "0"; // Remove any default margin
+    dateInClone.style.position = "relative";
+    dateInClone.style.top = "-8px"; // Move the text upward explicitly
+    dateInClone.style.transform = "translateY(4px)";
+}
+
+    const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
+    if (dateWrapper) {
+        dateWrapper.style.display = "flex";
+    dateWrapper.style.justifyContent = "center";
+    dateWrapper.style.marginTop = "0"; // Remove default margin
+    dateWrapper.style.height = "2rem"; // Limit height to reduce bottom space
+    dateWrapper.style.overflow = "hidden"; // Prevent extra space from child
     }
-    // Write temporary loading message
-    newTab.document.write(`
+
+    const waitForImages = (container) => {
+        const imgs = container.querySelectorAll("img");
+        return Promise.all(
+            Array.from(imgs).map((img) => {
+                if (img.complete && img.naturalHeight !== 0)
+                    return Promise.resolve();
+                return new Promise((resolve) => {
+                    img.onload = img.onerror = () => resolve();
+                });
+            })
+        );
+    };
+
+    // Open the tab *before* async operations to avoid popup blocking
+    let newTab = null;
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        newTab = window.open("about:blank", "_blank");
+        if (!newTab) {
+            alert("Popup blocked. Please enable popups to download the image.");
+            return;
+        }
+        newTab.document.write(`
       <html><head><title>Loading...</title></head>
       <body><p style="font-family:sans-serif;text-align:center;margin-top:2rem;">Rendering image, please wait...</p></body></html>
     `);
-    newTab.document.close();
-  }
+        newTab.document.close();
+    }
 
-  requestAnimationFrame(() => {
-    waitForImages(clone)
-      .then(() => {
-        return html2canvas(clone, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: null,
-        });
-      })
-      .then((canvas) => {
-        const dataUrl = canvas.toDataURL("image/png");
+    requestAnimationFrame(() => {
+        waitForImages(clone)
+            .then(() => {
+                return html2canvas(clone, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: null,
+                });
+            })
+            .then((canvas) => {
+                const dataUrl = canvas.toDataURL("image/png");
 
-        if (isMobile && newTab) {
-          // Replace the loading page with the final image
-          newTab.document.open();
-          newTab.document.write(`
+                if (isMobile && newTab) {
+                    newTab.document.open();
+                    newTab.document.write(`
             <html><head><title>PhotoStrip</title></head>
             <body style="margin:0;">
               <img src="${dataUrl}" style="max-width:100%;height:auto;display:block;margin:auto;" />
             </body></html>
           `);
-          newTab.document.close();
-        } else {
-          // Desktop download
-          const link = document.createElement("a");
-          link.href = dataUrl;
-          link.download = "photostrip.png";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-      })
-      .catch((err) => {
-        console.error("html2canvas error:", err);
-        alert("Failed to capture image.");
-      })
-      .finally(() => {
-        if (hiddenContainer.parentNode) {
-          document.body.removeChild(hiddenContainer);
-        }
-      });
-  });
+                    newTab.document.close();
+                } else {
+                    const link = document.createElement("a");
+                    link.href = dataUrl;
+                    link.download = "photostrip.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            })
+            .catch((err) => {
+                console.error("html2canvas error:", err);
+                alert("Failed to capture image.");
+            })
+            .finally(() => {
+                if (hiddenContainer.parentNode) {
+                    document.body.removeChild(hiddenContainer);
+                }
+            });
+    });
 };
 
+
     //For Print
-    const handlePrint = () => {
-        const original = document.querySelector(".p-4.w-fit.relative");
-        if (!original) return;
+    // const handlePrint = () => {
+    //     const original = document.querySelector(".p-4.w-fit.relative");
+    //     if (!original) return;
 
-        const cloneWrapper = original.closest(".preview-scale-wrapper");
-        const clone = cloneWrapper.cloneNode(true);
+    //     const cloneWrapper = original.closest(".preview-scale-wrapper");
+    //     const clone = cloneWrapper.cloneNode(true);
 
-        // Remove scale classes to avoid distortions
-        clone.classList.remove(
-            "scale-[0.6]",
-            "scale-[0.75]",
-            "scale-[0.9]",
-            "scale-100"
-        );
+    //     // Remove scale classes to avoid distortions
+    //     clone.classList.remove(
+    //         "scale-[0.6]",
+    //         "scale-[0.75]",
+    //         "scale-[0.9]",
+    //         "scale-100"
+    //     );
 
-        const hiddenContainer = document.createElement("div");
-        hiddenContainer.style.position = "fixed";
-        hiddenContainer.style.top = "-10000px";
-        hiddenContainer.style.left = "-10000px";
-        hiddenContainer.style.zIndex = "-1";
-        hiddenContainer.appendChild(clone);
-        document.body.appendChild(hiddenContainer);
+    //     const hiddenContainer = document.createElement("div");
+    //     hiddenContainer.style.position = "fixed";
+    //     hiddenContainer.style.top = "-10000px";
+    //     hiddenContainer.style.left = "-10000px";
+    //     hiddenContainer.style.zIndex = "-1";
+    //     hiddenContainer.appendChild(clone);
+    //     document.body.appendChild(hiddenContainer);
 
-        requestAnimationFrame(() => {
-            html2canvas(clone, { scale: 2 }).then((canvas) => {
-                const dataUrl = canvas.toDataURL("image/png");
+    //     requestAnimationFrame(() => {
+    //         html2canvas(clone, { scale: 2 }).then((canvas) => {
+    //             const dataUrl = canvas.toDataURL("image/png");
 
-                const printWindow = window.open("", "_blank");
+    //             const printWindow = window.open("", "_blank");
 
-                if (!printWindow) {
-                    alert("Please allow popups for this site to print.");
-                    document.body.removeChild(hiddenContainer);
-                    return;
-                }
+    //             if (!printWindow) {
+    //                 alert("Please allow popups for this site to print.");
+    //                 document.body.removeChild(hiddenContainer);
+    //                 return;
+    //             }
 
-                printWindow.document.write(`
-                <html lang="en">
-                    <head>
-                        <style>
-                            @page {
-                                margin: 0;
-                            }
-                            html, body {
-                                margin: 0;
-                                padding: 0;
-                                background: white;
-                                width: 100vw;
-                                height: 100vh;
-                            }
-                            body {
-                                padding: 0;
-                            }
-                            img {
-                                display: block;
-                                width: auto;
-                                height: auto;
-                                max-width: 80vw;
-                                max-height: 80vh;
-                                box-shadow: none !important;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <img src="${dataUrl}" onload="window.focus(); window.print(); window.onafterprint = () => window.close();" />
-                    </body>
-                </html>
-            `);
-                printWindow.document.close();
+    //             printWindow.document.write(`
+    //             <html lang="en">
+    //                 <head>
+    //                     <style>
+    //                         @page {
+    //                             margin: 0;
+    //                         }
+    //                         html, body {
+    //                             margin: 0;
+    //                             padding: 0;
+    //                             background: white;
+    //                             width: 100vw;
+    //                             height: 100vh;
+    //                         }
+    //                         body {
+    //                             padding: 0;
+    //                         }
+    //                         img {
+    //                             display: block;
+    //                             width: auto;
+    //                             height: auto;
+    //                             max-width: 80vw;
+    //                             max-height: 80vh;
+    //                             box-shadow: none !important;
+    //                         }
+    //                     </style>
+    //                 </head>
+    //                 <body>
+    //                     <img src="${dataUrl}" onload="window.focus(); window.print(); window.onafterprint = () => window.close();" />
+    //                 </body>
+    //             </html>
+    //         `);
+    //             printWindow.document.close();
 
-                document.body.removeChild(hiddenContainer);
-            });
-        });
-    };
+    //             document.body.removeChild(hiddenContainer);
+    //         });
+    //     });
+    // };
 
     return (
         <Layout>
@@ -362,29 +408,29 @@ const Customize = () => {
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {[
-                                  "none",
-                                  "vintage",
-                                  "sepia",
-                                  "bw",
-                                  "retro1",
-                                  "retro2",
-                                  "retro3",
-                                  "warm",
-                                  "cool",
-                                  "cold",
+                                    "none",
+                                    "vintage",
+                                    "sepia",
+                                    "bw",
+                                    "retro1",
+                                    "retro2",
+                                    "retro3",
+                                    "warm",
+                                    "cool",
+                                    "cold",
                                 ].map((f) => (
-                                  <button
-                                    key={f}
-                                    onClick={() => setFilter(f)}
-                                    className={`px-4 py-1.5 rounded-full border text-sm transition-all duration-200 shadow-sm ${
-                                      filter === f
-                                        ? "bg-pink-600 text-white border-pink-600"
-                                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    }`}
-                                    type="button"
-                                  >
-                                    {f.charAt(0).toUpperCase() + f.slice(1)}
-                                  </button>
+                                    <button
+                                        key={f}
+                                        onClick={() => setFilter(f)}
+                                        className={`px-4 py-1.5 rounded-full border text-sm transition-all duration-200 shadow-sm ${
+                                            filter === f
+                                                ? "bg-pink-600 text-white border-pink-600"
+                                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                                        }`}
+                                        type="button"
+                                    >
+                                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                                    </button>
                                 ))}
                             </div>
                         </div>
@@ -449,7 +495,8 @@ const Customize = () => {
                             <label className="block font-semibold text-purple-800 mb-2">
                                 Sticker
                             </label>
-                            <div className="flex items-center flex-wrap gap-3">
+
+                            <div className="flex items-center flex-wrap gap-3 mb-3">
                                 {stickers.map((emoji, index) => (
                                     <button
                                         key={index}
@@ -468,12 +515,48 @@ const Customize = () => {
                                         {emoji}
                                     </button>
                                 ))}
+
                                 <button
                                     onClick={() => setSelectedSticker(null)}
                                     className="ml-2 text-sm text-pink-600 underline hover:text-pink-700"
                                     type="button"
                                 >
                                     Clear
+                                </button>
+                            </div>
+
+                            {/* Input + Add button for new sticker */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    maxLength={2}
+                                    value={newSticker}
+                                    onChange={(e) =>
+                                        setNewSticker(e.target.value)
+                                    }
+                                    placeholder="Add emoji"
+                                    className="border rounded px-2 py-1 text-lg w-28"
+                                    aria-label="Add new emoji"
+                                />
+                                <button
+                                    onClick={() => {
+                                        if (
+                                            newSticker.trim() &&
+                                            !stickers.includes(
+                                                newSticker.trim()
+                                            )
+                                        ) {
+                                            setStickers([
+                                                ...stickers,
+                                                newSticker.trim(),
+                                            ]);
+                                            setNewSticker("");
+                                        }
+                                    }}
+                                    className="bg-pink-600 text-white rounded px-3 py-1 hover:bg-pink-700 transition"
+                                    type="button"
+                                >
+                                    Add
                                 </button>
                             </div>
                         </div>
@@ -490,13 +573,13 @@ const Customize = () => {
                             </button>
 
                             {/* Print Button */}
-                            <button
+                            {/* <button
                                 type="button"
                                 onClick={handlePrint}
                                 className="w-full py-2 px-4 bg-blue-400 text-white font-semibold rounded-lg shadow hover:bg-blue-500 transition mt-2"
                             >
                                 Print Strip
-                            </button>
+                            </button> */}
 
                             {/* Preview Button (Mobile Modal) */}
                             <button
