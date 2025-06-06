@@ -26,25 +26,34 @@
 import React from 'react';
 
 const LandingModal = ({ onClose, onLayoutSelect }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-        <h2 className="text-2xl font-semibold mb-4">Choose Layout</h2>
-        <div className="space-x-3 mb-4">
-          {[2, 3, 4, 6].map((count) => (
-            <button
-              key={count}
-              onClick={() => onLayoutSelect(count)}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg"
-            >
-              {count} Photos
-            </button>
-          ))}
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
+        <div className="bg-purple-50 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+          <h2 className="text-3xl font-extrabold mb-6 text-purple-700 drop-shadow-md">
+            Choose Layout
+          </h2>
+
+          <div className="grid grid-cols-2 gap-6 mb-8">
+            {[2, 3, 4, 6].map((count) => (
+              <button
+                key={count}
+                onClick={() => onLayoutSelect(count)}
+                className="bg-purple-600 hover:bg-purple-700 transition-colors text-white text-lg font-semibold py-3 rounded-xl shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300"
+              >
+                {count} Photos
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={onClose}
+            className="inline-block px-6 py-2 rounded-xl border border-purple-600 text-purple-600 font-semibold hover:bg-purple-100 hover:text-purple-700 transition-colors focus:outline-none focus:ring-4 focus:ring-purple-300"
+          >
+            Cancel
+          </button>
         </div>
-        <button onClick={onClose} className="text-gray-500 underline">Cancel</button>
       </div>
-    </div>
-  );
+    );
 };
 
 export default LandingModal;

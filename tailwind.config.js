@@ -14,6 +14,8 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                cursive: ['"Cedarville Cursive"', 'cursive'],
+                comfortaa: ['"Comfortaa"', 'sans-serif'],
             },
         },
     },

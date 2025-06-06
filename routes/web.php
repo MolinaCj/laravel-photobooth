@@ -24,5 +24,9 @@ Route::get('/photobooth', function () {
     return view('photobooth');
 });
 
+Route::get('/customize', function () {
+    return Inertia::render('Customize'); // <-- exact component name, case-sensitive
+});
+
 
 require __DIR__.'/auth.php';

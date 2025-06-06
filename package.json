@@ -23,6 +23,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "html2canvas": "^1.4.1",
         "react-webcam": "^7.2.0"
     }
 }
