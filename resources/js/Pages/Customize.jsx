@@ -23,7 +23,8 @@ const Customize = () => {
         "🍀",
         "✨",
         "💥",
-        "🐱‍👤",
+        "🐱",
+        "🥷",
         "🌈",
         "🎈",
         "🍓",
@@ -390,15 +391,16 @@ if (dateInClone) {
                                 </label>
                             </div>
 
-                            <label className="flex items-center gap-2 text-purple-700 font-medium">
-                                <input
-                                    type="checkbox"
-                                    checked={showDate}
-                                    onChange={() => setShowDate(!showDate)}
-                                    className="accent-pink-600"
-                                />
-                                Show Date
-                            </label>
+                            <label className="flex items-center gap-3 cursor-pointer select-none text-purple-800 font-semibold">
+  <input
+    type="checkbox"
+    checked={showDate}
+    onChange={() => setShowDate(!showDate)}
+    className="w-5 h-5 rounded-md accent-pink-600 shadow-sm transition duration-200 ease-in-out focus:ring-2 focus:ring-pink-400"
+  />
+  <span className="text-lg">Show Date</span>
+</label>
+
                         </div>
 
                         {/* Filters */}
@@ -420,17 +422,20 @@ if (dateInClone) {
                                     "cold",
                                 ].map((f) => (
                                     <button
-                                        key={f}
-                                        onClick={() => setFilter(f)}
-                                        className={`px-4 py-1.5 rounded-full border text-sm transition-all duration-200 shadow-sm ${
-                                            filter === f
-                                                ? "bg-pink-600 text-white border-pink-600"
-                                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                                        }`}
-                                        type="button"
-                                    >
-                                        {f.charAt(0).toUpperCase() + f.slice(1)}
-                                    </button>
+  key={f}
+  onClick={() => setFilter(f)}
+  type="button"
+  className={`px-4 py-1.5 rounded-full border text-sm transition-transform duration-300 shadow-sm
+    ${
+      filter === f
+        ? "bg-pink-600 text-white border-pink-600"
+        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:-translate-y-1"
+    }
+  `}
+>
+  {f.charAt(0).toUpperCase() + f.slice(1)}
+</button>
+
                                 ))}
                             </div>
                         </div>
@@ -517,47 +522,38 @@ if (dateInClone) {
                                 ))}
 
                                 <button
-                                    onClick={() => setSelectedSticker(null)}
-                                    className="ml-2 text-sm text-pink-600 underline hover:text-pink-700"
-                                    type="button"
-                                >
-                                    Clear
-                                </button>
+  onClick={() => setSelectedSticker(null)}
+  type="button"
+  className="ml-2 text-sm text-blue-600 underline transition-colors duration-300 hover:text-red-800 hover:-translate-y-1 focus:outline-none"
+>
+  Clear
+</button>
+
                             </div>
 
                             {/* Input + Add button for new sticker */}
                             <div className="flex gap-2">
                                 <input
-                                    type="text"
-                                    maxLength={2}
-                                    value={newSticker}
-                                    onChange={(e) =>
-                                        setNewSticker(e.target.value)
-                                    }
-                                    placeholder="Add emoji"
-                                    className="border rounded px-2 py-1 text-lg w-28"
-                                    aria-label="Add new emoji"
-                                />
-                                <button
-                                    onClick={() => {
-                                        if (
-                                            newSticker.trim() &&
-                                            !stickers.includes(
-                                                newSticker.trim()
-                                            )
-                                        ) {
-                                            setStickers([
-                                                ...stickers,
-                                                newSticker.trim(),
-                                            ]);
-                                            setNewSticker("");
-                                        }
-                                    }}
-                                    className="bg-pink-600 text-white rounded px-3 py-1 hover:bg-pink-700 transition"
-                                    type="button"
-                                >
-                                    Add
-                                </button>
+    type="text"
+    maxLength={2}
+    value={newSticker}
+    onChange={(e) => setNewSticker(e.target.value)}
+    placeholder="Add emoji"
+    aria-label="Add new emoji"
+    className="border border-gray-300 rounded-md px-2 py-1 text-base w-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
+  />
+  <button
+    onClick={() => {
+      if (newSticker.trim() && !stickers.includes(newSticker.trim())) {
+        setStickers([...stickers, newSticker.trim()]);
+        setNewSticker("");
+      }
+    }}
+    type="button"
+    className="bg-pink-600 text-white rounded-md px-3 py-1 text-sm hover:bg-pink-700 transition focus:outline-none focus:ring-2 focus:ring-pink-500"
+  >
+    Add
+  </button>
                             </div>
                         </div>
 
@@ -565,12 +561,15 @@ if (dateInClone) {
                         <div className="pt-4 border-t border-purple-100 space-y-3">
                             {/* Download Button */}
                             <button
-                                type="button"
-                                onClick={handleDownload}
-                                className="w-full py-2 px-4 bg-purple-600 text-white font-semibold rounded-lg shadow hover:bg-purple-700 transition"
-                            >
-                                Download Strip
-                            </button>
+  type="button"
+  onClick={handleDownload}
+  className="w-full py-2 px-4 bg-purple-600 text-white font-semibold rounded-lg shadow
+             hover:bg-purple-700 transition-transform transform hover:-translate-y-1
+             active:scale-95"
+>
+  Download Strip
+</button>
+
 
                             {/* Print Button */}
                             {/* <button
@@ -582,22 +581,28 @@ if (dateInClone) {
                             </button> */}
 
                             {/* Preview Button (Mobile Modal) */}
-                            <button
-                                type="button"
-                                onClick={() => setShowMobilePreview(true)}
-                                className="w-full py-2 px-4 bg-pink-500 text-white font-semibold rounded-lg shadow hover:bg-pink-600 transition"
-                            >
-                                Preview
-                            </button>
+                           <button
+  type="button"
+  onClick={() => setShowMobilePreview(true)}
+  className="w-full py-2 px-4 bg-pink-500 text-white font-semibold rounded-lg shadow
+             hover:bg-pink-600 transition-transform transform hover:-translate-y-1
+             active:scale-95"
+>
+  Preview
+</button>
+
 
                             {/* Retake Button */}
                             <button
-                                type="button"
-                                onClick={() => router.visit("/")} // Redirects to Landing page
-                                className="w-full py-2 px-4 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow hover:bg-yellow-500 transition"
-                            >
-                                Create New
-                            </button>
+  type="button"
+  onClick={() => router.visit("/")} // Redirects to Landing page
+  className="w-full py-2 px-4 bg-yellow-400 text-purple-800 font-semibold rounded-lg shadow
+             hover:bg-yellow-500 transition-transform transform hover:-translate-y-1
+             active:scale-95"
+>
+  Create New
+</button>
+
                         </div>
                     </div>
                 </div>
