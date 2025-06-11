@@ -18,8 +18,30 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
 
     const capture = () => {
         if (imageSrcs.length >= layout) return;
-        const image = webcamRef.current.getScreenshot();
-        setImageSrcs((prev) => [...prev, image]);
+
+        const screenshot = webcamRef.current.getScreenshot();
+        if (!screenshot) return;
+
+        // Create a canvas and flip the image horizontally
+        const image = new Image();
+        image.src = screenshot;
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+
+            const ctx = canvas.getContext("2d");
+
+            // Flip horizontally
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+
+            ctx.drawImage(image, 0, 0);
+
+            const flippedImage = canvas.toDataURL("image/jpeg");
+
+            setImageSrcs((prev) => [...prev, flippedImage]);
+        };
     };
 
     const startAutoCapture = () => {
@@ -132,21 +154,27 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
 
             {currentMode === "camera" && imageSrcs.length < layout && (
                 <div className="relative flex flex-col items-center gap-4">
-                    <Webcam
-                        audio={false}
-                        ref={webcamRef}
-                        screenshotFormat="image/jpeg"
-                        width={320}
-                        height={240}
-                        className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300 transform scale-x-[-1]"
-                    />
+                    <div
+                        className="relative"
+                        style={{ width: "2in", height: "2in" }}
+                    >
+                        <Webcam
+                            audio={false}
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300 transform scale-x-[-1]"
+                            style={{ width: "2in", height: "2in" }}
+                        />
 
-                    {/* Countdown Overlay */}
-                    {countdown && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl font-bold text-white drop-shadow-lg pointer-events-none">
-                            {countdown}
-                        </div>
-                    )}
+                        {/* Countdown Overlay */}
+                        {countdown && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-6xl font-bold text-white drop-shadow-lg pointer-events-none">
+                                    {countdown}
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
                     <button
                         onClick={startAutoCapture}
