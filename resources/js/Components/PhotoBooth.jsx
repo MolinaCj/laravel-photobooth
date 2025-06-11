@@ -96,39 +96,38 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
 
             <div className="mb-4 flex gap-2">
                 <button
-  onClick={onReset}
-  className="flex items-center gap-2 px-6 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
->
-  ← <span>Back</span>
-</button>
+                    onClick={onReset}
+                    className="flex items-center gap-2 px-6 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
+                >
+                    ← <span>Back</span>
+                </button>
 
-{currentMode === "camera" && imageSrcs.length > 0 && (
-  <button
-    onClick={handleResetImages}
-    className="bg-yellow-400 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
-  >
-    🔁 Retake
-  </button>
-)}
+                {currentMode === "camera" && imageSrcs.length > 0 && (
+                    <button
+                        onClick={handleResetImages}
+                        className="bg-yellow-400 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
+                    >
+                        🔁 Retake
+                    </button>
+                )}
 
-{currentMode === "upload" && imageSrcs.length > 0 && (
-  <button
-    onClick={handleResetImages}
-    className="bg-blue-400 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
-  >
-    🔁 Re-upload
-  </button>
-)}
+                {currentMode === "upload" && imageSrcs.length > 0 && (
+                    <button
+                        onClick={handleResetImages}
+                        className="bg-blue-400 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
+                    >
+                        🔁 Re-upload
+                    </button>
+                )}
 
-{imageSrcs.length === layout && (
-  <button
-    onClick={handleEdit}
-    className="bg-purple-600 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
-  >
-    ✏️ Edit Photo
-  </button>
-)}
-
+                {imageSrcs.length === layout && (
+                    <button
+                        onClick={handleEdit}
+                        className="bg-purple-600 text-white px-4 py-2 rounded transition-transform hover:-translate-y-1 transition-all duration-200 active:scale-95"
+                    >
+                        ✏️ Edit Photo
+                    </button>
+                )}
             </div>
 
             {currentMode === "camera" && imageSrcs.length < layout && (
@@ -150,27 +149,26 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
                     )}
 
                     <button
-  onClick={startAutoCapture}
-  disabled={autoCapturing || imageSrcs.length >= layout}
-  className="flex items-center gap-2 px-6 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
->
-  <span>📸</span>
-  <span>
-    {autoCapturing ? "Capturing..." : "Capture"}
-  </span>
-</button>
-
+                        onClick={startAutoCapture}
+                        disabled={autoCapturing || imageSrcs.length >= layout}
+                        className="flex items-center gap-2 px-6 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span>📸</span>
+                        <span>
+                            {autoCapturing ? "Capturing..." : "Capture"}
+                        </span>
+                    </button>
                 </div>
             )}
 
             {currentMode === "upload" && imageSrcs.length < layout && (
                 <div className="flex flex-col items-center gap-4">
                     <label
-  htmlFor="photo-upload"
-  className="cursor-pointer px-6 py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
->
-  ➕ Upload Photos
-</label>
+                        htmlFor="photo-upload"
+                        className="cursor-pointer px-6 py-3 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
+                    >
+                        ➕ Upload Photos
+                    </label>
 
                     <input
                         id="photo-upload"
@@ -186,28 +184,25 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
                 </div>
             )}
 
-{imageSrcs.length > 0 && (
-  <div className="mt-6 w-full max-w-4xl flex flex-col sm:flex-row gap-4 justify-center items-center">
-
+            {imageSrcs.length > 0 && (
+  <div className="mt-6 w-full max-w-4xl flex flex-wrap gap-4 justify-center items-center">
     {imageSrcs.map((src, i) => (
       <img
         key={i}
         src={src}
         alt={`Preview ${i + 1}`}
-        className="rounded border w-full sm:w-24 sm:h-20 object-cover"
+        className="rounded border w-24 h-20 object-cover"
       />
     ))}
   </div>
 )}
 
-{imageSrcs.length >= layout && (
-  <p className="mt-4 text-green-600 font-semibold">
-    ✅ All {layout} photos captured!
-  </p>
-)}
 
-
-
+            {imageSrcs.length >= layout && (
+                <p className="mt-4 text-green-600 font-semibold">
+                    ✅ All {layout} photos captured!
+                </p>
+            )}
         </div>
     );
 };
