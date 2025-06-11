@@ -185,18 +185,17 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
             )}
 
             {imageSrcs.length > 0 && (
-  <div className="mt-6 w-full max-w-4xl flex flex-wrap gap-4 justify-center items-center">
-    {imageSrcs.map((src, i) => (
-      <img
-        key={i}
-        src={src}
-        alt={`Preview ${i + 1}`}
-        className="rounded border w-24 h-20 object-cover"
-      />
-    ))}
-  </div>
-)}
-
+                <div className="mt-6 w-full max-w-4xl flex flex-wrap gap-4 justify-center items-center">
+                    {imageSrcs.map((src, i) => (
+                        <img
+                            key={i}
+                            src={src}
+                            alt={`Preview ${i + 1}`}
+                            className="rounded border w-24 h-20 object-cover"
+                        />
+                    ))}
+                </div>
+            )}
 
             {imageSrcs.length >= layout && (
                 <p className="mt-4 text-green-600 font-semibold">

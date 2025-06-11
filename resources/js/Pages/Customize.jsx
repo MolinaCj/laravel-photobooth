@@ -80,97 +80,96 @@ const Customize = () => {
     );
 
     // For download
-const handleDownload = () => {
-    const original = document.querySelector(".p-4.w-full.relative");
-    if (!original) return;
+    const handleDownload = () => {
+        const original = document.querySelector(".p-4.w-full.relative");
+        if (!original) return;
 
-    const cloneWrapper = original.closest(".preview-scale-wrapper");
-    if (!cloneWrapper) return;
+        const cloneWrapper = original.closest(".preview-scale-wrapper");
+        if (!cloneWrapper) return;
 
-    const clone = cloneWrapper.cloneNode(true);
+        const clone = cloneWrapper.cloneNode(true);
 
-    // Container to keep the clone off-screen
-    const hiddenContainer = document.createElement("div");
-    hiddenContainer.style.position = "fixed";
-    hiddenContainer.style.top = "-10000px";
-    hiddenContainer.style.left = "-10000px";
-    hiddenContainer.style.zIndex = "-1";
-    hiddenContainer.style.width = cloneWrapper.offsetWidth + "px"; // Retain layout
-    hiddenContainer.appendChild(clone);
-    document.body.appendChild(hiddenContainer);
+        // Container to keep the clone off-screen
+        const hiddenContainer = document.createElement("div");
+        hiddenContainer.style.position = "fixed";
+        hiddenContainer.style.top = "-10000px";
+        hiddenContainer.style.left = "-10000px";
+        hiddenContainer.style.zIndex = "-1";
+        hiddenContainer.style.width = cloneWrapper.offsetWidth + "px"; // Retain layout
+        hiddenContainer.appendChild(clone);
+        document.body.appendChild(hiddenContainer);
 
-    // === STYLE FIX FOR DATE ===
-    const dateInClone = clone.querySelector(".text-xs.font-cursive");
-    if (dateInClone) {
-        const computed = getComputedStyle(dateInClone);
-        dateInClone.style.fontFamily = computed.fontFamily;
-        dateInClone.style.fontSize = computed.fontSize;
-        dateInClone.style.color = computed.color;
-        dateInClone.style.backgroundColor = computed.backgroundColor;
-        dateInClone.style.padding = computed.padding;
-        dateInClone.style.boxShadow = computed.boxShadow;
-        dateInClone.style.textAlign = "center";
-        dateInClone.style.marginTop = "0";
-        dateInClone.style.position = "relative";
-        dateInClone.style.top = "-6px";
-        dateInClone.style.transform = "translateY(4px)";
-    }
+        // === STYLE FIX FOR DATE ===
+        const dateInClone = clone.querySelector(".text-xs.font-cursive");
+        if (dateInClone) {
+            const computed = getComputedStyle(dateInClone);
+            dateInClone.style.fontFamily = computed.fontFamily;
+            dateInClone.style.fontSize = computed.fontSize;
+            dateInClone.style.color = computed.color;
+            dateInClone.style.backgroundColor = computed.backgroundColor;
+            dateInClone.style.padding = computed.padding;
+            dateInClone.style.boxShadow = computed.boxShadow;
+            dateInClone.style.textAlign = "center";
+            dateInClone.style.marginTop = "0";
+            dateInClone.style.position = "relative";
+            dateInClone.style.top = "-6px";
+            dateInClone.style.transform = "translateY(4px)";
+        }
 
-    // Optional: minimize bottom space of date wrapper
-    const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
-    if (dateWrapper) {
-        dateWrapper.style.marginTop = "0";
-        dateWrapper.style.height = "2rem";
-        dateWrapper.style.overflow = "hidden";
-        dateWrapper.style.display = "flex";
-        dateWrapper.style.justifyContent = "center";
-    }
+        // Optional: minimize bottom space of date wrapper
+        const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
+        if (dateWrapper) {
+            dateWrapper.style.marginTop = "0";
+            dateWrapper.style.height = "2rem";
+            dateWrapper.style.overflow = "hidden";
+            dateWrapper.style.display = "flex";
+            dateWrapper.style.justifyContent = "center";
+        }
 
-    const waitForImages = (container) => {
-        const imgs = container.querySelectorAll("img");
-        return Promise.all(
-            Array.from(imgs).map((img) =>
-                img.complete && img.naturalHeight !== 0
-                    ? Promise.resolve()
-                    : new Promise((resolve) => {
-                          img.onload = img.onerror = () => resolve();
-                      })
-            )
-        );
-    };
+        const waitForImages = (container) => {
+            const imgs = container.querySelectorAll("img");
+            return Promise.all(
+                Array.from(imgs).map((img) =>
+                    img.complete && img.naturalHeight !== 0
+                        ? Promise.resolve()
+                        : new Promise((resolve) => {
+                              img.onload = img.onerror = () => resolve();
+                          })
+                )
+            );
+        };
 
-    requestAnimationFrame(() => {
-        waitForImages(clone)
-            .then(() =>
-                html2canvas(clone, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: false,
-                    backgroundColor: null,
-                    windowWidth: clone.offsetWidth, // Ensures layout is preserved
+        requestAnimationFrame(() => {
+            waitForImages(clone)
+                .then(() =>
+                    html2canvas(clone, {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: false,
+                        backgroundColor: null,
+                        windowWidth: clone.offsetWidth, // Ensures layout is preserved
+                    })
+                )
+                .then((canvas) => {
+                    const dataUrl = canvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.href = dataUrl;
+                    link.download = "photostrip.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 })
-            )
-            .then((canvas) => {
-                const dataUrl = canvas.toDataURL("image/png");
-                const link = document.createElement("a");
-                link.href = dataUrl;
-                link.download = "photostrip.png";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            })
-            .catch((err) => {
-                console.error("html2canvas error:", err);
-                alert("Failed to capture image.");
-            })
-            .finally(() => {
-                if (hiddenContainer.parentNode) {
-                    document.body.removeChild(hiddenContainer);
-                }
-            });
-    });
-};
-
+                .catch((err) => {
+                    console.error("html2canvas error:", err);
+                    alert("Failed to capture image.");
+                })
+                .finally(() => {
+                    if (hiddenContainer.parentNode) {
+                        document.body.removeChild(hiddenContainer);
+                    }
+                });
+        });
+    };
 
     //For Print
     // const handlePrint = () => {
@@ -257,7 +256,7 @@ const handleDownload = () => {
 
                 {/* Content Section (Preview + Controls) */}
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 w-fit mx-auto">
-                                        {/* Controls Section */}
+                    {/* Controls Section */}
                     <div className="w-full md:w-96 mx-auto bg-white p-6 rounded-xl shadow-lg border border-purple-100">
                         {/* Style & Date Toggle */}
                         <div className="space-y-4">
@@ -510,16 +509,18 @@ const handleDownload = () => {
 
                     {/* Preview Section Wrapper */}
                     <div className="w-full flex justify-center px-4">
-    <div className="preview-scale-wrapper max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
-
-        <div
-            className="p-4 w-full relative"
-            style={{
-                backgroundColor:
-                    style === "film" ? "black" : bgColor || "#E9D8FD",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
-            }}
-        >
+                        <div className="preview-scale-wrapper max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
+                            <div
+                                className="p-4 w-full relative"
+                                style={{
+                                    backgroundColor:
+                                        style === "film"
+                                            ? "black"
+                                            : bgColor || "#E9D8FD",
+                                    boxShadow:
+                                        "0 20px 40px rgba(0, 0, 0, 0.35)",
+                                }}
+                            >
                                 {/* Left sprockets for film */}
                                 {style === "film" && images.length > 0 && (
                                     <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
@@ -534,41 +535,43 @@ const handleDownload = () => {
                                 )}
 
                                 {/* Image strip container */}
-<div className="relative px-4 py-3 flex flex-col items-center gap-4">
-    {images.length === 0 ? (
-        <p className="text-center text-gray-500">No images to display.</p>
-    ) : (
-        images.map((img, index) => (
-<div
-    key={index}
-    className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
-    style={{
-        border: isStripNone ? "none" : `4px solid ${stripColor}`,
-        transition: "border 0.2s ease-in-out",
-    }}
->
-<img
-  src={img}
-  alt={`Image ${index + 1}`}
-  className={`w-full h-full object-contain ${filterClasses[filter]}`}
-/>
+                                <div className="relative px-4 py-3 flex flex-col items-center gap-4">
+                                    {images.length === 0 ? (
+                                        <p className="text-center text-gray-500">
+                                            No images to display.
+                                        </p>
+                                    ) : (
+                                        images.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
+                                                style={{
+                                                    border: isStripNone
+                                                        ? "none"
+                                                        : `4px solid ${stripColor}`,
+                                                    transition:
+                                                        "border 0.2s ease-in-out",
+                                                }}
+                                            >
+                                                <img
+                                                    src={img}
+                                                    alt={`Image ${index + 1}`}
+                                                    className={`w-full h-full object-contain ${filterClasses[filter]}`}
+                                                />
 
-    {/* Sticker overlay */}
-    {selectedSticker && (
-        <div
-            className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
-            aria-hidden="true"
-        >
-            {selectedSticker}
-        </div>
-    )}
-</div>
-
-
-        ))
-    )}
-</div>
-
+                                                {/* Sticker overlay */}
+                                                {selectedSticker && (
+                                                    <div
+                                                        className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
+                                                        aria-hidden="true"
+                                                    >
+                                                        {selectedSticker}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
 
                                 {/* Right sprockets for film */}
                                 {style === "film" && images.length > 0 && (
@@ -599,106 +602,109 @@ const handleDownload = () => {
             </div>
 
             {/* PREVIEW MODAL */}
-{showMobilePreview && (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-2">
-        <div className="relative max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
-            {/* Close Button */}
-            <button
-                onClick={() => setShowMobilePreview(false)}
-                className="absolute top-2 right-2 text-white text-2xl z-50"
-                title="Close"
-            >
-                ✖
-            </button>
+            {showMobilePreview && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-2">
+                    <div className="relative max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowMobilePreview(false)}
+                            className="absolute top-2 right-2 text-white text-2xl z-50"
+                            title="Close"
+                        >
+                            ✖
+                        </button>
 
-            {/* Scaled Preview */}
-            <div className="w-full inline-block origin-top scale-[0.6] sm:scale-[0.75] md:scale-[0.9] lg:scale-100">
-                <div
-                    className="p-4 w-full relative"
-                    style={{
-                        backgroundColor:
-                            style === "film" ? "black" : bgColor || "#E9D8FD",
-                        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
-                    }}
-                >
-                    {/* Left sprockets for film */}
-                    {style === "film" && images.length > 0 && (
-                        <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                            {[...Array(12)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="w-2 h-4 bg-white"
-                                    style={{ borderRadius: "1px" }}
-                                />
-                            ))}
-                        </div>
-                    )}
+                        {/* Scaled Preview */}
+                        <div className="w-full inline-block origin-top scale-[0.6] sm:scale-[0.75] md:scale-[0.9] lg:scale-100">
+                            <div
+                                className="p-4 w-full relative"
+                                style={{
+                                    backgroundColor:
+                                        style === "film"
+                                            ? "black"
+                                            : bgColor || "#E9D8FD",
+                                    boxShadow:
+                                        "0 20px 40px rgba(0, 0, 0, 0.35)",
+                                }}
+                            >
+                                {/* Left sprockets for film */}
+                                {style === "film" && images.length > 0 && (
+                                    <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                                        {[...Array(12)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-2 h-4 bg-white"
+                                                style={{ borderRadius: "1px" }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
-                    {/* Image strip container */}
-                    <div className="relative px-4 py-3 flex flex-col items-center gap-4">
-                        {images.length === 0 ? (
-                            <p className="text-center text-gray-500">
-                                No images to display.
-                            </p>
-                        ) : (
-                            images.map((img, index) => (
-<div
-    key={index}
-    className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
-    style={{
-        border: isStripNone ? "none" : `4px solid ${stripColor}`,
-        transition: "border 0.2s ease-in-out",
-    }}
->
-    <img
-        src={img}
-        alt={`Image ${index + 1}`}
-        className="w-full h-full object-contain"
-    />
+                                {/* Image strip container */}
+                                <div className="relative px-4 py-3 flex flex-col items-center gap-4">
+                                    {images.length === 0 ? (
+                                        <p className="text-center text-gray-500">
+                                            No images to display.
+                                        </p>
+                                    ) : (
+                                        images.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
+                                                style={{
+                                                    border: isStripNone
+                                                        ? "none"
+                                                        : `4px solid ${stripColor}`,
+                                                    transition:
+                                                        "border 0.2s ease-in-out",
+                                                }}
+                                            >
+                                                <img
+                                                    src={img}
+                                                    alt={`Image ${index + 1}`}
+                                                    className="w-full h-full object-contain"
+                                                />
 
-    {/* Sticker overlay */}
-    {selectedSticker && (
-        <div
-            className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
-            aria-hidden="true"
-        >
-            {selectedSticker}
-        </div>
-    )}
-</div>
+                                                {/* Sticker overlay */}
+                                                {selectedSticker && (
+                                                    <div
+                                                        className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
+                                                        aria-hidden="true"
+                                                    >
+                                                        {selectedSticker}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
 
+                                {/* Right sprockets for film */}
+                                {style === "film" && images.length > 0 && (
+                                    <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                                        {[...Array(12)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-2 h-4 bg-white"
+                                                style={{ borderRadius: "1px" }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
-                            ))
-                        )}
-                    </div>
-
-                    {/* Right sprockets for film */}
-                    {style === "film" && images.length > 0 && (
-                        <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                            {[...Array(12)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="w-2 h-4 bg-white"
-                                    style={{ borderRadius: "1px" }}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Date display */}
-                    {showDate && (
-                        <div className="mt-4 flex justify-center">
-                            <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
-                                {currentDate}
+                                {/* Date display */}
+                                {showDate && (
+                                    <div className="mt-4 flex justify-center">
+                                        <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
+                                            {currentDate}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-)}
-
+            )}
         </Layout>
     );
 };
