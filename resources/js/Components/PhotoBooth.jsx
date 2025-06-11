@@ -162,7 +162,12 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
                             audio={false}
                             ref={webcamRef}
                             screenshotFormat="image/jpeg"
-                            className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300 transform scale-x-[-1]"
+                            videoConstraints={{
+                                width: 480,
+                                height: 480, // Force a square resolution
+                                facingMode: "user", // Front camera for mobile
+                            }}
+                            className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300 transform scale-x-[-1] object-cover"
                             style={{ width: "2in", height: "2in" }}
                         />
 
