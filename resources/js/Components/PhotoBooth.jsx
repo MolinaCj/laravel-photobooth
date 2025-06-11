@@ -138,7 +138,7 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
                         screenshotFormat="image/jpeg"
                         width={320}
                         height={240}
-                        className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300"
+                        className="rounded-xl border-2 border-purple-500 shadow-md transition-all duration-300 transform scale-x-[-1]"
                     />
 
                     {/* Countdown Overlay */}
