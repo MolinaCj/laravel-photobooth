@@ -34,7 +34,7 @@ const LandingModal = ({ onClose, onLayoutSelect }) => {
         </h2>
 
         <div className="grid grid-cols-2 gap-6 mb-8">
-          {[2, 3, 4, 6].map((count) => (
+          {[2, 3, 4].map((count) => (
             <button
               key={count}
               onClick={() => onLayoutSelect(count)}
