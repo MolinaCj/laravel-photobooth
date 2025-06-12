@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 import { router } from "@inertiajs/react"; // Inertia router
+import Cropper from "react-easy-crop";
+import getCroppedImg from "../utils/cropImage"; // we'll create this helper
 
 const PhotoBooth = ({ layout, mode, onReset }) => {
     const [currentMode, setCurrentMode] = useState(null);
@@ -11,6 +13,14 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
     const [countdown, setCountdown] = useState(null);
     const captureIntervalRef = useRef(null);
     const countdownRef = useRef(null);
+
+    // FOR CROPPING
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [currentImage, setCurrentImage] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
+
 
     useEffect(() => {
         setCurrentMode(mode);
@@ -80,17 +90,15 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
     }, []);
 
     const handleUpload = (e) => {
-        const files = Array.from(e.target.files).slice(
-            0,
-            layout - imageSrcs.length
-        );
-        files.forEach((file) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImageSrcs((prev) => [...prev, reader.result]);
-            };
-            reader.readAsDataURL(file);
-        });
+        const files = Array.from(e.target.files).slice(0, layout - imageSrcs.length);
+        if (files.length === 0) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setCurrentImage(reader.result);  // temporarily store uploaded image
+            setShowCropper(true);            // open cropper
+        };
+        reader.readAsDataURL(files[0]); // handle one at a time for cropping
     };
 
     const handleEdit = () => {
@@ -109,6 +117,24 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
         setCountdown(null); // hide countdown if showing
         clearInterval(countdownRef.current); // clear any ongoing countdown
     };
+
+    const onCropComplete = (_, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    const handleCropSave = async () => {
+    try {
+        const croppedImage = await getCroppedImg(currentImage, croppedAreaPixels);
+        setImageSrcs((prev) => [...prev, croppedImage]);
+        setShowCropper(false);
+        setCurrentImage(null);
+    } catch (error) {
+        console.error("Cropping failed:", error);
+        alert("Something went wrong while cropping.");
+    }
+};
+
+
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -234,6 +260,39 @@ const PhotoBooth = ({ layout, mode, onReset }) => {
                 <p className="mt-4 text-green-600 font-semibold">
                     ✅ All {layout} photos captured!
                 </p>
+            )}
+
+            {showCropper && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center px-4">
+                    <div className="bg-white p-4 rounded-lg w-full max-w-md sm:max-w-lg">
+                        <div className="relative w-full aspect-square">
+                            <Cropper
+                                image={currentImage}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={1}
+                                onCropChange={setCrop}
+                                onZoomChange={setZoom}
+                                onCropComplete={onCropComplete}
+                            />
+                        </div>
+
+                        <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2">
+                            <button
+                                onClick={() => setShowCropper(false)}
+                                className="w-full sm:w-auto px-4 py-2 bg-gray-300 rounded hover:bg-gray-400  text-black font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCropSave}
+                                className="w-full sm:w-auto px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 text-white font-medium shadow transition-all duration-200 transition-transform hover:-translate-y-1 active:scale-95"
+                            >
+                                Crop & Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

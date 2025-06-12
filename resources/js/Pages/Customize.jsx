@@ -14,6 +14,7 @@ const Customize = () => {
     const [isStripNone, setIsStripNone] = useState(true); // "None" checkbox initially checked
     const [selectedSticker, setSelectedSticker] = useState(null);
     const [showMobilePreview, setShowMobilePreview] = useState(false);
+
     const [stickers, setStickers] = useState([
         "🎉",
         "🌟",
@@ -53,6 +54,19 @@ const Customize = () => {
         cold: "brightness-95 hue-rotate-[220deg] saturate-75",
     };
 
+    const filterStyles = {
+        none: "",
+        vintage: "contrast(1.25) sepia(1)",
+        sepia: "sepia(1)",
+        bw: "grayscale(1)",
+        retro1: "contrast(1.25) saturate(1.5) hue-rotate(-10deg) brightness(1.1)",
+        retro2: "sepia(0.5) contrast(1.1) brightness(0.95)",
+        retro3: "hue-rotate(15deg) saturate(0.75) brightness(1.05)",
+        warm: "sepia(0.3) brightness(1.1) hue-rotate(-10deg)",
+        cool: "contrast(1.1) hue-rotate(180deg) saturate(1.25)",
+        cold: "brightness(0.95) hue-rotate(220deg) saturate(0.75)",
+    };
+
     // const stickers = ["🎉", "🌟", "😎", "💖"];
 
     // Render a single photo with optional sticker overlay and filter
@@ -80,96 +94,141 @@ const Customize = () => {
     );
 
     // For download
-    const handleDownload = () => {
-        const original = document.querySelector(".p-4.w-full.relative");
-        if (!original) return;
+const handleDownload = () => {
+    const original = document.querySelector(".p-4.relative");
+    if (!original) return;
 
-        const cloneWrapper = original.closest(".preview-scale-wrapper");
-        if (!cloneWrapper) return;
+    const cloneWrapper = original.closest(".preview-scale-wrapper");
+    if (!cloneWrapper) return;
 
-        const clone = cloneWrapper.cloneNode(true);
+    const clone = cloneWrapper.cloneNode(true);
 
-        // Container to keep the clone off-screen
-        const hiddenContainer = document.createElement("div");
-        hiddenContainer.style.position = "fixed";
-        hiddenContainer.style.top = "-10000px";
-        hiddenContainer.style.left = "-10000px";
-        hiddenContainer.style.zIndex = "-1";
-        hiddenContainer.style.width = cloneWrapper.offsetWidth + "px"; // Retain layout
-        hiddenContainer.appendChild(clone);
-        document.body.appendChild(hiddenContainer);
+    // Re-apply filters to all image elements
+    const originalImages = cloneWrapper.querySelectorAll("img");
+    const clonedImages = clone.querySelectorAll("img");
 
-        // === STYLE FIX FOR DATE ===
-        const dateInClone = clone.querySelector(".text-xs.font-cursive");
-        if (dateInClone) {
-            const computed = getComputedStyle(dateInClone);
-            dateInClone.style.fontFamily = computed.fontFamily;
-            dateInClone.style.fontSize = computed.fontSize;
-            dateInClone.style.color = computed.color;
-            dateInClone.style.backgroundColor = computed.backgroundColor;
-            dateInClone.style.padding = computed.padding;
-            dateInClone.style.boxShadow = computed.boxShadow;
-            dateInClone.style.textAlign = "center";
-            dateInClone.style.marginTop = "0";
-            dateInClone.style.position = "relative";
-            dateInClone.style.top = "-6px";
-            dateInClone.style.transform = "translateY(4px)";
+    originalImages.forEach((img, index) => {
+        const originalFilter = img.style.filter;
+        if (clonedImages[index]) {
+            clonedImages[index].style.filter = originalFilter;
         }
+    });
 
-        // Optional: minimize bottom space of date wrapper
-        const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
-        if (dateWrapper) {
-            dateWrapper.style.marginTop = "0";
-            dateWrapper.style.height = "2rem";
-            dateWrapper.style.overflow = "hidden";
-            dateWrapper.style.display = "flex";
-            dateWrapper.style.justifyContent = "center";
-        }
+    const replaceImagesWithCanvas = async (container) => {
+        const imgElements = container.querySelectorAll("img");
 
-        const waitForImages = (container) => {
-            const imgs = container.querySelectorAll("img");
-            return Promise.all(
-                Array.from(imgs).map((img) =>
-                    img.complete && img.naturalHeight !== 0
-                        ? Promise.resolve()
-                        : new Promise((resolve) => {
-                              img.onload = img.onerror = () => resolve();
-                          })
-                )
-            );
-        };
+        await Promise.all(
+            Array.from(imgElements).map((img) => {
+                return new Promise((resolve) => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
 
-        requestAnimationFrame(() => {
-            waitForImages(clone)
-                .then(() =>
-                    html2canvas(clone, {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: false,
-                        backgroundColor: null,
-                        windowWidth: clone.offsetWidth, // Ensures layout is preserved
-                    })
-                )
-                .then((canvas) => {
-                    const dataUrl = canvas.toDataURL("image/png");
-                    const link = document.createElement("a");
-                    link.href = dataUrl;
-                    link.download = "photostrip.png";
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                })
-                .catch((err) => {
-                    console.error("html2canvas error:", err);
-                    alert("Failed to capture image.");
-                })
-                .finally(() => {
-                    if (hiddenContainer.parentNode) {
-                        document.body.removeChild(hiddenContainer);
-                    }
+                    const width = img.naturalWidth;
+                    const height = img.naturalHeight;
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx.filter = img.style.filter || "none";
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.style.width = img.style.width || img.width + "px";
+                    canvas.style.height = img.style.height || img.height + "px";
+                    canvas.style.objectFit = img.style.objectFit || "contain";
+
+                    img.replaceWith(canvas);
+                    resolve();
                 });
-        });
+            })
+        );
     };
+
+    const hiddenContainer = document.createElement("div");
+    hiddenContainer.style.position = "fixed";
+    hiddenContainer.style.top = "-10000px";
+    hiddenContainer.style.left = "-10000px";
+    hiddenContainer.style.zIndex = "-1";
+
+    // 🔍 Set the clone to match the on-screen pixel width of the preview
+    const pixelWidth = cloneWrapper.getBoundingClientRect().width + "px";
+    hiddenContainer.style.width = pixelWidth;
+    clone.style.width = pixelWidth; // Apply to inner content
+
+    hiddenContainer.appendChild(clone);
+    document.body.appendChild(hiddenContainer);
+
+    // Fix Date Font/Layout
+    const dateInClone = clone.querySelector(".text-xs.font-cursive");
+    if (dateInClone) {
+        const computed = getComputedStyle(dateInClone);
+        dateInClone.style.fontFamily = computed.fontFamily;
+        dateInClone.style.fontSize = computed.fontSize;
+        dateInClone.style.color = computed.color;
+        dateInClone.style.backgroundColor = computed.backgroundColor;
+        dateInClone.style.padding = computed.padding;
+        dateInClone.style.boxShadow = computed.boxShadow;
+        dateInClone.style.textAlign = "center";
+        dateInClone.style.marginTop = "0";
+        dateInClone.style.position = "relative";
+        dateInClone.style.top = "-6px";
+        dateInClone.style.transform = "translateY(4px)";
+    }
+
+    const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
+    if (dateWrapper) {
+        dateWrapper.style.marginTop = "0";
+        dateWrapper.style.height = "2rem";
+        dateWrapper.style.overflow = "hidden";
+        dateWrapper.style.display = "flex";
+        dateWrapper.style.justifyContent = "center";
+    }
+
+    const waitForImages = (container) => {
+        const imgs = container.querySelectorAll("img");
+        return Promise.all(
+            Array.from(imgs).map((img) =>
+                img.complete && img.naturalHeight !== 0
+                    ? Promise.resolve()
+                    : new Promise((resolve) => {
+                          img.onload = img.onerror = () => resolve();
+                      })
+            )
+        );
+    };
+
+    requestAnimationFrame(() => {
+        waitForImages(clone)
+            .then(() => replaceImagesWithCanvas(clone))
+            .then(() =>
+                html2canvas(clone, {
+                    scale: 5,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: null,
+                    width: clone.offsetWidth,
+                    windowWidth: clone.offsetWidth,
+                })
+            )
+            .then((canvas) => {
+                const dataUrl = canvas.toDataURL("image/png");
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "photostrip.png";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch((err) => {
+                console.error("html2canvas error:", err);
+                alert("Failed to capture image.");
+            })
+            .finally(() => {
+                if (hiddenContainer.parentNode) {
+                    document.body.removeChild(hiddenContainer);
+                }
+            });
+    });
+};
 
     //For Print
     // const handlePrint = () => {
@@ -245,6 +304,7 @@ const Customize = () => {
     //         });
     //     });
     // };
+
 
     return (
         <Layout>
@@ -322,12 +382,12 @@ const Customize = () => {
                                         onClick={() => setFilter(f)}
                                         type="button"
                                         className={`px-4 py-1.5 rounded-full border text-sm transition-transform duration-300 shadow-sm
-    ${
-        filter === f
-            ? "bg-pink-600 text-white border-pink-600"
-            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:-translate-y-1"
-    }
-  `}
+                                            ${
+                                                filter === f
+                                                    ? "bg-pink-600 text-white border-pink-600"
+                                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:-translate-y-1"
+                                            }
+                                          `}
                                     >
                                         {f.charAt(0).toUpperCase() + f.slice(1)}
                                     </button>
@@ -509,9 +569,14 @@ const Customize = () => {
 
                     {/* Preview Section Wrapper */}
                     <div className="w-full flex justify-center px-4">
-                        <div className="preview-scale-wrapper max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
+                        <div className="preview-scale-wrapper mx-auto"
+                        style={{
+                                width: "200px", // consistent download + layout
+                                maxWidth: "100%", // responsive fallback
+                            }}
+                            >
                             <div
-                                className="p-4 w-full relative"
+                                className="p-4 relative"
                                 style={{
                                     backgroundColor:
                                         style === "film"
@@ -556,14 +621,27 @@ const Customize = () => {
                                                 <img
                                                     src={img}
                                                     alt={`Image ${index + 1}`}
-                                                    className={`w-full h-full object-contain ${filterClasses[filter]}`}
+                                                    className={`w-full h-full object-contain`}
+                                                    style={{
+                                                        filter: filterStyles[
+                                                            filter
+                                                        ],
+                                                    }}
                                                 />
 
                                                 {/* Sticker overlay */}
                                                 {selectedSticker && (
                                                     <div
-                                                        className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
+                                                        className="absolute text-2xl pointer-events-none select-none"
                                                         aria-hidden="true"
+                                                        style={{
+                                                            top: "4px",
+                                                            left: "4px",
+                                                            position:
+                                                                "absolute",
+                                                            pointerEvents:
+                                                                "none",
+                                                        }}
                                                     >
                                                         {selectedSticker}
                                                     </div>
@@ -662,7 +740,7 @@ const Customize = () => {
                                                 <img
                                                     src={img}
                                                     alt={`Image ${index + 1}`}
-                                                    className="w-full h-full object-contain"
+                                                    className={`w-full h-full object-contain ${filterClasses[filter]}`}
                                                 />
 
                                                 {/* Sticker overlay */}
