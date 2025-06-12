@@ -94,166 +94,171 @@ const Customize = () => {
     );
 
     // For download
-const handleDownload = () => {
-    const original = document.querySelector(".p-4.relative");
-    if (!original) return;
+    const handleDownload = () => {
+        const original = document.querySelector(".p-4.relative");
+        if (!original) return;
 
-    const cloneWrapper = original.closest(".preview-scale-wrapper");
-    if (!cloneWrapper) return;
+        const cloneWrapper = original.closest(".preview-scale-wrapper");
+        if (!cloneWrapper) return;
 
-    const clone = cloneWrapper.cloneNode(true);
+        const clone = cloneWrapper.cloneNode(true);
 
-    // Re-apply filters to all image elements
-    const originalImages = cloneWrapper.querySelectorAll("img");
-    const clonedImages = clone.querySelectorAll("img");
+        // Re-apply filters to all image elements
+        const originalImages = cloneWrapper.querySelectorAll("img");
+        const clonedImages = clone.querySelectorAll("img");
 
-    originalImages.forEach((img, index) => {
-        const originalFilter = img.style.filter;
-        if (clonedImages[index]) {
-            clonedImages[index].style.filter = originalFilter;
-        }
-    });
+        originalImages.forEach((img, index) => {
+            const originalFilter = img.style.filter;
+            if (clonedImages[index]) {
+                clonedImages[index].style.filter = originalFilter;
+            }
+        });
 
-    const replaceImagesWithCanvas = async (container) => {
-        const imgElements = container.querySelectorAll("img");
+        const replaceImagesWithCanvas = async (container) => {
+            const imgElements = container.querySelectorAll("img");
 
-        await Promise.all(
-            Array.from(imgElements).map((img) => {
-                return new Promise((resolve) => {
-                    const canvas = document.createElement("canvas");
-                    const ctx = canvas.getContext("2d");
+            await Promise.all(
+                Array.from(imgElements).map((img) => {
+                    return new Promise((resolve) => {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
 
-                    const width = img.naturalWidth;
-                    const height = img.naturalHeight;
+                        const width = img.naturalWidth;
+                        const height = img.naturalHeight;
 
-                    canvas.width = width;
-                    canvas.height = height;
+                        canvas.width = width;
+                        canvas.height = height;
 
-                    ctx.filter = img.style.filter || "none";
-                    ctx.drawImage(img, 0, 0, width, height);
+                        ctx.filter = img.style.filter || "none";
+                        ctx.drawImage(img, 0, 0, width, height);
 
-                    canvas.style.width = img.style.width || img.width + "px";
-                    canvas.style.height = img.style.height || img.height + "px";
-                    canvas.style.objectFit = img.style.objectFit || "contain";
+                        canvas.style.width =
+                            img.style.width || img.width + "px";
+                        canvas.style.height =
+                            img.style.height || img.height + "px";
+                        canvas.style.objectFit =
+                            img.style.objectFit || "contain";
 
-                    img.replaceWith(canvas);
-                    resolve();
-                });
-            })
+                        img.replaceWith(canvas);
+                        resolve();
+                    });
+                })
+            );
+        };
+
+        // Fix image wrapper sizes to match actual display
+        const originalImageWrappers = cloneWrapper.querySelectorAll(
+            "div.relative.w-28, div.relative.w-32, div.relative.w-36"
         );
-    };
-
-    // Fix image wrapper sizes to match actual display
-    const originalImageWrappers = cloneWrapper.querySelectorAll("div.relative.w-28, div.relative.w-32, div.relative.w-36");
-    const clonedImageWrappers = clone.querySelectorAll("div.relative.w-28, div.relative.w-32, div.relative.w-36");
-
-    originalImageWrappers.forEach((wrapper, i) => {
-        const computed = getComputedStyle(wrapper);
-        const cloneWrapper = clonedImageWrappers[i];
-        if (cloneWrapper) {
-            cloneWrapper.style.width = computed.width;
-            cloneWrapper.style.height = computed.height;
-        }
-    });
-
-
-    const hiddenContainer = document.createElement("div");
-    hiddenContainer.style.position = "fixed";
-    hiddenContainer.style.top = "-10000px";
-    hiddenContainer.style.left = "-10000px";
-    hiddenContainer.style.zIndex = "-1";
-
-    const previewWidth = 180; // fixed preview width in px
-    const scale = 5;
-
-    hiddenContainer.style.width = previewWidth + "px";
-    clone.style.width = previewWidth + "px";
-    clone.style.maxWidth = "100%";
-    clone.style.boxSizing = "border-box";
-    clone.style.transform = "scale(1)";
-    clone.style.transformOrigin = "top left";
-
-    hiddenContainer.appendChild(clone);
-    document.body.appendChild(hiddenContainer);
-
-    // Fix Date Font/Layout
-    const dateInClone = clone.querySelector(".text-xs.font-cursive");
-    if (dateInClone) {
-        const computed = getComputedStyle(dateInClone);
-        dateInClone.style.fontFamily = computed.fontFamily;
-        dateInClone.style.fontSize = computed.fontSize;
-        dateInClone.style.color = computed.color;
-        dateInClone.style.backgroundColor = computed.backgroundColor;
-        dateInClone.style.padding = computed.padding;
-        dateInClone.style.boxShadow = computed.boxShadow;
-        dateInClone.style.textAlign = "center";
-        dateInClone.style.marginTop = "0";
-        dateInClone.style.position = "relative";
-        dateInClone.style.top = "-6px";
-        dateInClone.style.transform = "translateY(4px)";
-    }
-
-    const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
-    if (dateWrapper) {
-        dateWrapper.style.marginTop = "0";
-        dateWrapper.style.height = "2rem";
-        dateWrapper.style.overflow = "hidden";
-        dateWrapper.style.display = "flex";
-        dateWrapper.style.justifyContent = "center";
-    }
-
-    const waitForImages = (container) => {
-        const imgs = container.querySelectorAll("img");
-        return Promise.all(
-            Array.from(imgs).map((img) =>
-                img.complete && img.naturalHeight !== 0
-                    ? Promise.resolve()
-                    : new Promise((resolve) => {
-                          img.onload = img.onerror = () => resolve();
-                      })
-            )
+        const clonedImageWrappers = clone.querySelectorAll(
+            "div.relative.w-28, div.relative.w-32, div.relative.w-36"
         );
-    };
 
-    requestAnimationFrame(() => {
-        waitForImages(clone)
-            .then(() => replaceImagesWithCanvas(clone))
-            .then(() => {
-                const finalWidth = previewWidth;
-                const finalHeight = clone.offsetHeight;
+        originalImageWrappers.forEach((wrapper, i) => {
+            const computed = getComputedStyle(wrapper);
+            const cloneWrapper = clonedImageWrappers[i];
+            if (cloneWrapper) {
+                cloneWrapper.style.width = computed.width;
+                cloneWrapper.style.height = computed.height;
+            }
+        });
 
-                return html2canvas(clone, {
-                    scale: scale,
-                    useCORS: true,
-                    allowTaint: false,
-                    backgroundColor: null,
-                    width: finalWidth,
-                    height: finalHeight,
-                    windowWidth: finalWidth,
-                    windowHeight: finalHeight,
+        const hiddenContainer = document.createElement("div");
+        hiddenContainer.style.position = "fixed";
+        hiddenContainer.style.top = "-10000px";
+        hiddenContainer.style.left = "-10000px";
+        hiddenContainer.style.zIndex = "-1";
+
+        const previewWidth = 180; // fixed preview width in px
+        const scale = 5;
+
+        hiddenContainer.style.width = previewWidth + "px";
+        clone.style.width = previewWidth + "px";
+        clone.style.maxWidth = "100%";
+        clone.style.boxSizing = "border-box";
+        clone.style.transform = "scale(1)";
+        clone.style.transformOrigin = "top left";
+
+        hiddenContainer.appendChild(clone);
+        document.body.appendChild(hiddenContainer);
+
+        // Fix Date Font/Layout
+        const dateInClone = clone.querySelector(".text-xs.font-cursive");
+        if (dateInClone) {
+            const computed = getComputedStyle(dateInClone);
+            dateInClone.style.fontFamily = computed.fontFamily;
+            dateInClone.style.fontSize = computed.fontSize;
+            dateInClone.style.color = computed.color;
+            dateInClone.style.backgroundColor = computed.backgroundColor;
+            dateInClone.style.padding = computed.padding;
+            dateInClone.style.boxShadow = computed.boxShadow;
+            dateInClone.style.textAlign = "center";
+            dateInClone.style.marginTop = "0";
+            dateInClone.style.position = "relative";
+            dateInClone.style.top = "-6px";
+            dateInClone.style.transform = "translateY(4px)";
+        }
+
+        const dateWrapper = clone.querySelector(".mt-4.flex.justify-center");
+        if (dateWrapper) {
+            dateWrapper.style.marginTop = "0";
+            dateWrapper.style.height = "2rem";
+            dateWrapper.style.overflow = "hidden";
+            dateWrapper.style.display = "flex";
+            dateWrapper.style.justifyContent = "center";
+        }
+
+        const waitForImages = (container) => {
+            const imgs = container.querySelectorAll("img");
+            return Promise.all(
+                Array.from(imgs).map((img) =>
+                    img.complete && img.naturalHeight !== 0
+                        ? Promise.resolve()
+                        : new Promise((resolve) => {
+                              img.onload = img.onerror = () => resolve();
+                          })
+                )
+            );
+        };
+
+        requestAnimationFrame(() => {
+            waitForImages(clone)
+                .then(() => replaceImagesWithCanvas(clone))
+                .then(() => {
+                    const finalWidth = previewWidth;
+                    const finalHeight = clone.offsetHeight;
+
+                    return html2canvas(clone, {
+                        scale: scale,
+                        useCORS: true,
+                        allowTaint: false,
+                        backgroundColor: null,
+                        width: finalWidth,
+                        height: finalHeight,
+                        windowWidth: finalWidth,
+                        windowHeight: finalHeight,
+                    });
+                })
+                .then((canvas) => {
+                    const dataUrl = canvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.href = dataUrl;
+                    link.download = "photostrip.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                })
+                .catch((err) => {
+                    console.error("html2canvas error:", err);
+                    alert("Failed to capture image.");
+                })
+                .finally(() => {
+                    if (hiddenContainer.parentNode) {
+                        document.body.removeChild(hiddenContainer);
+                    }
                 });
-            })
-            .then((canvas) => {
-                const dataUrl = canvas.toDataURL("image/png");
-                const link = document.createElement("a");
-                link.href = dataUrl;
-                link.download = "photostrip.png";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            })
-            .catch((err) => {
-                console.error("html2canvas error:", err);
-                alert("Failed to capture image.");
-            })
-            .finally(() => {
-                if (hiddenContainer.parentNode) {
-                    document.body.removeChild(hiddenContainer);
-                }
-            });
-    });
-};
-
+        });
+    };
 
     //For Print
     // const handlePrint = () => {
@@ -329,7 +334,6 @@ const handleDownload = () => {
     //         });
     //     });
     // };
-
 
     return (
         <Layout>
@@ -719,85 +723,102 @@ const handleDownload = () => {
 
                         {/* Scaled Preview */}
                         {/* Scaled Preview */}
-<div className="w-full flex justify-center">
-    <div
-        className="preview-scale-wrapper mx-auto w-[180px] sm:w-[180px] md:w-[180px] lg:w-[180px]"
-        style={{
-            maxWidth: "100%",
-        }}
-    >
-        <div
-            className="p-4 w-full relative"
-            style={{
-                backgroundColor:
-                    style === "film"
-                        ? "black"
-                        : bgColor || "#E9D8FD",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
-            }}
-        >
-            {/* Left sprockets */}
-            {style === "film" && images.length > 0 && (
-                <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-4 bg-white" style={{ borderRadius: "1px" }} />
-                    ))}
-                </div>
-            )}
+                        <div className="w-full flex justify-center">
+                            <div
+                                className="preview-scale-wrapper mx-auto w-[180px] sm:w-[180px] md:w-[180px] lg:w-[180px]"
+                                style={{
+                                    maxWidth: "100%",
+                                }}
+                            >
+                                <div
+                                    className="p-4 w-full relative"
+                                    style={{
+                                        backgroundColor:
+                                            style === "film"
+                                                ? "black"
+                                                : bgColor || "#E9D8FD",
+                                        boxShadow:
+                                            "0 20px 40px rgba(0, 0, 0, 0.35)",
+                                    }}
+                                >
+                                    {/* Left sprockets */}
+                                    {style === "film" && images.length > 0 && (
+                                        <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                                            {[...Array(12)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="w-2 h-4 bg-white"
+                                                    style={{
+                                                        borderRadius: "1px",
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
 
-            {/* Image strip container */}
-            <div className="relative px-4 py-3 flex flex-col items-center gap-4">
-                {images.length === 0 ? (
-                    <p className="text-center text-gray-500">No images to display.</p>
-                ) : (
-                    images.map((img, index) => (
-                        <div
-                            key={index}
-                            className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
-                            style={{
-                                border: isStripNone
-                                    ? "none"
-                                    : `2px solid ${stripColor}`,
-                                transition: "border 0.2s ease-in-out",
-                            }}
-                        >
-                            <img
-                                src={img}
-                                alt={`Image ${index + 1}`}
-                                className={`w-full h-full object-contain ${filterClasses[filter]}`}
-                            />
+                                    {/* Image strip container */}
+                                    <div className="relative px-4 py-3 flex flex-col items-center gap-4">
+                                        {images.length === 0 ? (
+                                            <p className="text-center text-gray-500">
+                                                No images to display.
+                                            </p>
+                                        ) : (
+                                            images.map((img, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
+                                                    style={{
+                                                        border: isStripNone
+                                                            ? "none"
+                                                            : `2px solid ${stripColor}`,
+                                                        transition:
+                                                            "border 0.2s ease-in-out",
+                                                    }}
+                                                >
+                                                    <img
+                                                        src={img}
+                                                        alt={`Image ${
+                                                            index + 1
+                                                        }`}
+                                                        className={`w-full h-full object-contain ${filterClasses[filter]}`}
+                                                    />
 
-                            {selectedSticker && (
-                                <div className="absolute top-1 left-1 text-2xl pointer-events-none select-none">
-                                    {selectedSticker}
+                                                    {selectedSticker && (
+                                                        <div className="absolute top-1 left-1 text-2xl pointer-events-none select-none">
+                                                            {selectedSticker}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    {/* Right sprockets */}
+                                    {style === "film" && images.length > 0 && (
+                                        <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                                            {[...Array(12)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="w-2 h-4 bg-white"
+                                                    style={{
+                                                        borderRadius: "1px",
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Date display */}
+                                    {showDate && (
+                                        <div className="mt-4 flex justify-center">
+                                            <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
+                                                {currentDate}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
-                    ))
-                )}
-            </div>
-
-            {/* Right sprockets */}
-            {style === "film" && images.length > 0 && (
-                <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="w-2 h-4 bg-white" style={{ borderRadius: "1px" }} />
-                    ))}
-                </div>
-            )}
-
-            {/* Date display */}
-            {showDate && (
-                <div className="mt-4 flex justify-center">
-                    <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
-                        {currentDate}
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-</div>
-
                     </div>
                 </div>
             )}
