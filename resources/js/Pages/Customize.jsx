@@ -143,16 +143,35 @@ const handleDownload = () => {
         );
     };
 
+    // Fix image wrapper sizes to match actual display
+    const originalImageWrappers = cloneWrapper.querySelectorAll("div.relative.w-28, div.relative.w-32, div.relative.w-36");
+    const clonedImageWrappers = clone.querySelectorAll("div.relative.w-28, div.relative.w-32, div.relative.w-36");
+
+    originalImageWrappers.forEach((wrapper, i) => {
+        const computed = getComputedStyle(wrapper);
+        const cloneWrapper = clonedImageWrappers[i];
+        if (cloneWrapper) {
+            cloneWrapper.style.width = computed.width;
+            cloneWrapper.style.height = computed.height;
+        }
+    });
+
+
     const hiddenContainer = document.createElement("div");
     hiddenContainer.style.position = "fixed";
     hiddenContainer.style.top = "-10000px";
     hiddenContainer.style.left = "-10000px";
     hiddenContainer.style.zIndex = "-1";
 
-    // 🔍 Set the clone to match the on-screen pixel width of the preview
-    const pixelWidth = cloneWrapper.getBoundingClientRect().width + "px";
-    hiddenContainer.style.width = pixelWidth;
-    clone.style.width = pixelWidth; // Apply to inner content
+    const previewWidth = 200; // fixed preview width in px
+    const scale = 5;
+
+    hiddenContainer.style.width = previewWidth + "px";
+    clone.style.width = previewWidth + "px";
+    clone.style.maxWidth = "100%";
+    clone.style.boxSizing = "border-box";
+    clone.style.transform = "scale(1)";
+    clone.style.transformOrigin = "top left";
 
     hiddenContainer.appendChild(clone);
     document.body.appendChild(hiddenContainer);
@@ -199,16 +218,21 @@ const handleDownload = () => {
     requestAnimationFrame(() => {
         waitForImages(clone)
             .then(() => replaceImagesWithCanvas(clone))
-            .then(() =>
-                html2canvas(clone, {
-                    scale: 5,
+            .then(() => {
+                const finalWidth = previewWidth;
+                const finalHeight = clone.offsetHeight;
+
+                return html2canvas(clone, {
+                    scale: scale,
                     useCORS: true,
                     allowTaint: false,
                     backgroundColor: null,
-                    width: clone.offsetWidth,
-                    windowWidth: clone.offsetWidth,
-                })
-            )
+                    width: finalWidth,
+                    height: finalHeight,
+                    windowWidth: finalWidth,
+                    windowHeight: finalHeight,
+                });
+            })
             .then((canvas) => {
                 const dataUrl = canvas.toDataURL("image/png");
                 const link = document.createElement("a");
@@ -229,6 +253,7 @@ const handleDownload = () => {
             });
     });
 };
+
 
     //For Print
     // const handlePrint = () => {
