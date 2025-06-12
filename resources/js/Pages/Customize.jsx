@@ -163,7 +163,7 @@ const handleDownload = () => {
     hiddenContainer.style.left = "-10000px";
     hiddenContainer.style.zIndex = "-1";
 
-    const previewWidth = 200; // fixed preview width in px
+    const previewWidth = 180; // fixed preview width in px
     const scale = 5;
 
     hiddenContainer.style.width = previewWidth + "px";
@@ -594,12 +594,12 @@ const handleDownload = () => {
 
                     {/* Preview Section Wrapper */}
                     <div className="w-full flex justify-center px-4">
-                        <div className="preview-scale-wrapper mx-auto"
-                        style={{
-                                width: "200px", // consistent download + layout
-                                maxWidth: "100%", // responsive fallback
+                        <div
+                            className="preview-scale-wrapper mx-auto w-[180px] sm:w-[180px] md:w-[180px] lg:w-[180px]"
+                            style={{
+                                maxWidth: "100%",
                             }}
-                            >
+                        >
                             <div
                                 className="p-4 relative"
                                 style={{
@@ -638,7 +638,7 @@ const handleDownload = () => {
                                                 style={{
                                                     border: isStripNone
                                                         ? "none"
-                                                        : `4px solid ${stripColor}`,
+                                                        : `2px solid ${stripColor}`,
                                                     transition:
                                                         "border 0.2s ease-in-out",
                                                 }}
@@ -718,93 +718,86 @@ const handleDownload = () => {
                         </button>
 
                         {/* Scaled Preview */}
-                        <div className="w-full inline-block origin-top scale-[0.6] sm:scale-[0.75] md:scale-[0.9] lg:scale-100">
-                            <div
-                                className="p-4 w-full relative"
-                                style={{
-                                    backgroundColor:
-                                        style === "film"
-                                            ? "black"
-                                            : bgColor || "#E9D8FD",
-                                    boxShadow:
-                                        "0 20px 40px rgba(0, 0, 0, 0.35)",
-                                }}
-                            >
-                                {/* Left sprockets for film */}
-                                {style === "film" && images.length > 0 && (
-                                    <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                                        {[...Array(12)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="w-2 h-4 bg-white"
-                                                style={{ borderRadius: "1px" }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
+                        {/* Scaled Preview */}
+<div className="w-full flex justify-center">
+    <div
+        className="preview-scale-wrapper mx-auto w-[180px] sm:w-[180px] md:w-[180px] lg:w-[180px]"
+        style={{
+            maxWidth: "100%",
+        }}
+    >
+        <div
+            className="p-4 w-full relative"
+            style={{
+                backgroundColor:
+                    style === "film"
+                        ? "black"
+                        : bgColor || "#E9D8FD",
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
+            }}
+        >
+            {/* Left sprockets */}
+            {style === "film" && images.length > 0 && (
+                <div className="absolute top-0 bottom-0 left-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                    {[...Array(12)].map((_, i) => (
+                        <div key={i} className="w-2 h-4 bg-white" style={{ borderRadius: "1px" }} />
+                    ))}
+                </div>
+            )}
 
-                                {/* Image strip container */}
-                                <div className="relative px-4 py-3 flex flex-col items-center gap-4">
-                                    {images.length === 0 ? (
-                                        <p className="text-center text-gray-500">
-                                            No images to display.
-                                        </p>
-                                    ) : (
-                                        images.map((img, index) => (
-                                            <div
-                                                key={index}
-                                                className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
-                                                style={{
-                                                    border: isStripNone
-                                                        ? "none"
-                                                        : `4px solid ${stripColor}`,
-                                                    transition:
-                                                        "border 0.2s ease-in-out",
-                                                }}
-                                            >
-                                                <img
-                                                    src={img}
-                                                    alt={`Image ${index + 1}`}
-                                                    className={`w-full h-full object-contain ${filterClasses[filter]}`}
-                                                />
+            {/* Image strip container */}
+            <div className="relative px-4 py-3 flex flex-col items-center gap-4">
+                {images.length === 0 ? (
+                    <p className="text-center text-gray-500">No images to display.</p>
+                ) : (
+                    images.map((img, index) => (
+                        <div
+                            key={index}
+                            className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-white rounded overflow-hidden shadow"
+                            style={{
+                                border: isStripNone
+                                    ? "none"
+                                    : `2px solid ${stripColor}`,
+                                transition: "border 0.2s ease-in-out",
+                            }}
+                        >
+                            <img
+                                src={img}
+                                alt={`Image ${index + 1}`}
+                                className={`w-full h-full object-contain ${filterClasses[filter]}`}
+                            />
 
-                                                {/* Sticker overlay */}
-                                                {selectedSticker && (
-                                                    <div
-                                                        className="absolute top-1 left-1 text-2xl pointer-events-none select-none"
-                                                        aria-hidden="true"
-                                                    >
-                                                        {selectedSticker}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                    )}
+                            {selectedSticker && (
+                                <div className="absolute top-1 left-1 text-2xl pointer-events-none select-none">
+                                    {selectedSticker}
                                 </div>
-
-                                {/* Right sprockets for film */}
-                                {style === "film" && images.length > 0 && (
-                                    <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
-                                        {[...Array(12)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="w-2 h-4 bg-white"
-                                                style={{ borderRadius: "1px" }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Date display */}
-                                {showDate && (
-                                    <div className="mt-4 flex justify-center">
-                                        <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
-                                            {currentDate}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            )}
                         </div>
+                    ))
+                )}
+            </div>
+
+            {/* Right sprockets */}
+            {style === "film" && images.length > 0 && (
+                <div className="absolute top-0 bottom-0 right-0 z-10 flex flex-col justify-between items-center px-1 py-4 h-full">
+                    {[...Array(12)].map((_, i) => (
+                        <div key={i} className="w-2 h-4 bg-white" style={{ borderRadius: "1px" }} />
+                    ))}
+                </div>
+            )}
+
+            {/* Date display */}
+            {showDate && (
+                <div className="mt-4 flex justify-center">
+                    <div className="bg-white px-4 py-1 shadow text-xs font-cursive text-black select-none">
+                        {currentDate}
+                    </div>
+                </div>
+            )}
+        </div>
+    </div>
+</div>
+
                     </div>
                 </div>
             )}
